@@ -26,6 +26,8 @@ export default defineNuxtConfig({  modules: [
             AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
             AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
             AUTH0_CALLBACK_URL: process.env.AUTH0_CALLBACK_URL,
+            TRANSLATE_KEY: process.env.TRANSLATE_KEY,
+            UNSPLASH_KEY: process.env.UNSPLASH_KEY,
         }
     },
     auth: {

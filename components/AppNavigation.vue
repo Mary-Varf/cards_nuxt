@@ -10,7 +10,7 @@
                         <NuxtLink to="/" class="nav__link" aria-current="page">Home</NuxtLink>
                     </li>
                     <li class="nav-item">
-                        <NuxtLink to="/" class="nav__link" aria-current="page">Home</NuxtLink>
+                        <NuxtLink to="/add_word" class="nav__link" aria-current="page">Add New Word</NuxtLink>
                     </li>
                     <li class="nav-item">
                         <NuxtLink to="/" class="nav__link" aria-current="page">Home</NuxtLink>

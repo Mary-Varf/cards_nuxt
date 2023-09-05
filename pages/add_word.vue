@@ -1,9 +1,9 @@
 <template>
-    <div class="col-9" v-if="hasWords"><AppCard></AppCard></div>
+    <div class="col-9"><AddWord></AddWord></div>
 </template>
 
 <script setup>
-import AppCard from "~/components/AppCard.vue";
+import AddWord from "~/components/AddWord.vue";
 import { useStore } from "~/store/words";
 import { storeToRefs } from 'pinia';
 

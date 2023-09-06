@@ -1,5 +1,6 @@
 export const API = {
     GET_WORDS: '/api/words/all',
+    SAVE_WORD: '/api/words/create',
 }
 
 export const TRANSLATION_KEY = '72691a70-a628-4157-8493-302718bd8ad9';

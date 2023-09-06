@@ -8,17 +8,41 @@ export const useStore = defineStore({
         return {
             words: [],
             randomWord: { text: null, translation: null, img: null },
-            translation: '',
+            translation: null,
             img: null,
             englishTranslation: null,
+            wordToTranslate: null,
         }
     },
     getters: {
     },
     actions: {
+        setWordToTranslate(newWord) {
+            this.wordToTranslate = newWord;
+        },
+        async saveNewWord(newWord) {
+            console.log(newWord);
+            await $fetch(API.SAVE_WORD, {
+                method: 'POST',
+                body: newWord,
+            })
+                .then((resp) => {
+                    this.words = [...this.words].push(newWord);
+                    this.clearTranslations();
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
+        },
+        clearTranslations() {
+            this.translation = null;
+            this.img = null;
+            this.englishTranslation = null;
+            this.wordToTranslate = null;
+        },
         setRandomWord() {
-            const randomNumber = Math.floor(Math.random() * (this.words.length - 1));
-
+            const randomNumber = Math.floor(Math.random() * this.words.length);
+            console.log(randomNumber)
             this.randomWord = this.words[randomNumber];
         },
         async getWords() {
@@ -32,8 +56,6 @@ export const useStore = defineStore({
                 })
         },
         async getTranslation({ word, lg }) {
-            getEnglishTranslation({ word, lg });
-            console.log(lg)
             axios.request({
                 method: 'GET',
                 url: 'https://api.mymemory.translated.net/get',
@@ -43,17 +65,36 @@ export const useStore = defineStore({
                 },
             })
                 .then((res) => {
+                    console.log(res?.data?.responseData)
                     this.translation = res?.data?.responseData?.translatedText;
-                    console.log(res?.data?.responseData?.translatedText)
                 })
                 .catch((e) => {
                     console.log(e)
                 })
         },
         async getEnglishTranslation({ word, lg }) {
+            const initialLang = lg.slice(0, 2);
+            if (initialLang == 'en') {
+                this.englishTranslation = word;
+                return;
+            }
 
+            axios.request({
+                method: 'GET',
+                url: 'https://api.mymemory.translated.net/get',
+                params: {
+                    langpair: `${initialLang}|en`,
+                    q: word,
+                },
+            })
+                .then((res) => {
+                    this.englishTranslation = res?.data?.responseData?.translatedText;
+                })
+                .catch((e) => {
+                    console.log(e)
+                })
         },
-        async getImg(word) {
+        async getImg() {
             const config = useRuntimeConfig();
 
             axios.request({
@@ -61,11 +102,11 @@ export const useStore = defineStore({
                 url: UNSPLASH_API,
                 params: {
                     client_id: config.public.UNSPLASH_KEY,
-                    query: word,
+                    query: this.englishTranslation,
                 },
             })
                 .then((res) => {
-                    this.img = res?.data?.results.length ? res?.data?.results[0]?.urls?.small : 'https://via.placeholder.com/250x200'
+                    this.img = res?.data?.results.length ? res?.data?.results[0]?.urls?.small : null
                     console.log(res?.data?.results[0].urls.small)
                 })
                 .catch((e) => {

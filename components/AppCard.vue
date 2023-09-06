@@ -1,5 +1,6 @@
 <template>
     <div class="card__container p-2">
+        <button v-if="randomWord" @click="updateCard">New Card</button>
         <div v-if="randomWord"
              ref="card"
              class="flipcard"
@@ -8,6 +9,7 @@
                 <img :src="randomWord.img" class="card-img-top" :alt="getCardText()">
                 <div class="card-body text-md-center">
                     <h3 class="card-text">{{ randomWord.word }}</h3>
+                    <button @click="handleSpeak">Speak</button>
                 </div>
             </div>
 
@@ -25,8 +27,8 @@
 </template>
 
 <script setup>
-import DefaultCard from "~/components/DefaultCard.vue";
 import { storeToRefs } from 'pinia';
+import DefaultCard from "~/components/DefaultCard.vue";
 import { useStore } from "~/store/words";
 
 const wordsStore = useStore();
@@ -35,6 +37,12 @@ const card = ref(null);
 const isMainCardSide = ref(true);
 const text = ref(null);
 
+const updateCard = () => {
+    wordsStore.setRandomWord();
+}
+
+const handleSpeak = () => {
+}
 
 const toggleStateMainCardSide = () => {
     isMainCardSide.value = !isMainCardSide.value;
@@ -58,7 +66,6 @@ const toggleClass = () => {
 
 <style scoped>
     .card__container {
-        height: 100vh;
         width: 100%;
     }
     .card {

@@ -17,6 +17,7 @@
                 <input type="text"
                        class="form-control"
                        id="word"
+                       :value="wordToTranslate"
                        @input="setWord"
                        @keydown="handleEnter"
                 >
@@ -27,40 +28,54 @@
                        class="form-control"
                        id="translation"
                        :value="translation"
-                       @focus="translate"
+                       @focus="updateCard"
                 >
             </div>
             <div class="d-flex justify-content-center">
-                <button class="btn btn-primary mt-3">Save</button>
+                <button class="btn btn-primary mt-3" @click="handleSave">Save</button>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
+import mongoose from "mongoose";
 import { storeToRefs } from 'pinia';
 import { useStore } from "~/store/words";
 
 const wordsStore = useStore();
-const { translation, img } = storeToRefs(wordsStore);
-const word = ref(null);
+const { translation, img, wordToTranslate } = storeToRefs(wordsStore);
 const langs = ref('en|es');
-const translate = () => {
-    wordsStore.getTranslation({ word: word.value, lg: langs.value });
+const updateCard = () => {
+    wordsStore.getTranslation({ word: wordToTranslate.value, lg: langs.value });
+    wordsStore.getEnglishTranslation({ word: wordToTranslate.value, lg: langs.value });
+    wordsStore.getImg();
 }
 
 const setWord = (e) => {
-    word.value = e.target.value;
+    wordsStore.setWordToTranslate(e.target.value);
 }
 
 const setLangs = (e) => {
     langs.value = e.target.value;
 }
 
+const handleSave = () => {
+    if (!wordToTranslate.value || !wordToTranslate.value?.length || !translation) {
+        return;
+    }
+
+    wordsStore.saveNewWord({
+        _id: new mongoose.Types.ObjectId().toString(),
+        word: wordToTranslate.value,
+        translation: translation.value,
+        img: img.value,
+    })
+}
+
 const handleEnter = (e) => {
     if (e?.keyCode == 13) {
-        translate();
-        wordsStore.getImg(word.value);
+        updateCard();
     }
 }
 </script>

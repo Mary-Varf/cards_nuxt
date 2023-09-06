@@ -1,22 +1,21 @@
 <template>
-    <div class="col-9" v-if="hasWords"><AppCard></AppCard></div>
+    <div class="col-9">
+        <AppCard></AppCard>
+    </div>
 </template>
 
 <script setup>
+import { storeToRefs } from 'pinia';
 import AppCard from "~/components/AppCard.vue";
 import { useStore } from "~/store/words";
-import { storeToRefs } from 'pinia';
 
 const wordsStore = useStore();
 const { words } = storeToRefs(wordsStore);
 
-const hasWords = () => {
-    return words.length;
-}
 
-onMounted(() => {
-    wordsStore.getWords();
-})
+const updateCard = () => {
+
+}
 </script>
 
 <style scoped>

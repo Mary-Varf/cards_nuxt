@@ -6,6 +6,7 @@ export const useStore = defineStore({
     id: 'words-store',
     state: () => {
         return {
+            //TODO: change text to wordInEn, translation wordInEsp
             words: [],
             randomWord: { text: null, translation: null, img: null },
             translation: null,

@@ -1,6 +1,7 @@
 <template>
     <div class="card__container p-2">
         <button v-if="randomWord" @click="updateCard">New Card</button>
+        <button class="play" @click="play">Play</button>
         <div v-if="randomWord"
              ref="card"
              class="flipcard"
@@ -9,7 +10,6 @@
                 <img :src="randomWord.img" class="card-img-top" :alt="getCardText()">
                 <div class="card-body text-md-center">
                     <h3 class="card-text">{{ randomWord.word }}</h3>
-                    <button @click="handleSpeak">Speak</button>
                 </div>
             </div>
 
@@ -40,9 +40,66 @@ const text = ref(null);
 const updateCard = () => {
     wordsStore.setRandomWord();
 }
+let speech;
+// const handleSpeak = () => {
+//     console.log()
+// }
+let isChrome;
+let voices = [];
+let isFirefox;
+onMounted(() => {
+speech = window.speechSynthesis;
+// Firefox 1.0+
+isFirefox = typeof InstallTrigger !== 'undefined';
 
-const handleSpeak = () => {
-}
+// Chrome 1+
+isChrome = !!window.chrome && !!window.chrome.webstore;
+
+})
+function play() {
+
+    const getVoices = () => {
+        voices = speech.getVoices();
+        console.log(voices);
+
+        // // Loop through voices and create an option for each one
+        voices.forEach(voice => {
+            //     // Create option element
+            //     const option = document.createElement('option');
+            //     // Fill option with voice and language
+            //     option.textContent = voice.name + '(' + voice.lang + ')';
+            //
+            //     // Set needed option attributes
+            //     option.setAttribute('data-lang', voice.lang);
+            //     option.setAttribute('data-name', voice.name);
+            //     voiceSelect.appendChild(option);
+        });
+    };
+
+    if (isFirefox) {
+        getVoices();
+    }
+    if (isChrome) {
+        if (speech.onvoiceschanged !== undefined) {
+            speech.onvoiceschanged = getVoices;
+        }
+    } else {
+        getVoices()
+    }
+    if (speech?.speaking) {
+        alert("Alredy Speaking");
+        return;
+    }
+    let msg = new SpeechSynthesisUtterance(randomWord.translation)
+    const selectedVoice = 'Google español';
+    //
+    voices.forEach(voice => {
+        if (voice.name === selectedVoice) {
+            msg.voice = voice;
+        }
+    });
+    speech.speak(msg);
+};
 
 const toggleStateMainCardSide = () => {
     isMainCardSide.value = !isMainCardSide.value;

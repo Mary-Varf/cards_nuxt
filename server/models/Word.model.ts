@@ -2,11 +2,15 @@ import mongoose from 'mongoose';
 
 const schema: mongoose.Schema = new mongoose.Schema(
     {
-        word: {
+        wordInEn: {
             type: String,
             required: true,
         },
-        translation: {
+        wordInRu: {
+            type: String,
+            required: true,
+        },
+        wordInEs: {
             type: String,
             required: true,
         },

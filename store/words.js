@@ -8,21 +8,14 @@ export const useStore = defineStore({
         return {
             //TODO: change text to wordInEn, translation wordInEsp
             words: [],
-            randomWord: { text: null, translation: null, img: null },
-            translation: null,
-            img: null,
-            englishTranslation: null,
-            wordToTranslate: null,
+            randomWord: { wordInEn: null, wordInEs: null, wordInRu: null, img: null },
+            newWord: { wordInEn: null, wordInEs: null, wordInRu: null, img: null },
         }
     },
     getters: {
     },
     actions: {
-        setWordToTranslate(newWord) {
-            this.wordToTranslate = newWord;
-        },
         async saveNewWord(newWord) {
-            console.log(newWord);
             await $fetch(API.SAVE_WORD, {
                 method: 'POST',
                 body: newWord,
@@ -36,14 +29,15 @@ export const useStore = defineStore({
                 })
         },
         clearTranslations() {
-            this.translation = null;
-            this.img = null;
-            this.englishTranslation = null;
-            this.wordToTranslate = null;
+            this.newWord = {
+                wordInEs: null,
+                wordInRu: null,
+                wordInEn: null,
+                img: null,
+            }
         },
         setRandomWord() {
             const randomNumber = Math.floor(Math.random() * this.words.length);
-            console.log(randomNumber)
             this.randomWord = this.words[randomNumber];
         },
         async getWords() {
@@ -66,7 +60,6 @@ export const useStore = defineStore({
                 },
             })
                 .then((res) => {
-                    console.log(res?.data?.responseData)
                     this.translation = res?.data?.responseData?.translatedText;
                 })
                 .catch((e) => {
@@ -76,7 +69,7 @@ export const useStore = defineStore({
         async getEnglishTranslation({ word, lg }) {
             const initialLang = lg.slice(0, 2);
             if (initialLang == 'en') {
-                this.englishTranslation = word;
+                this.newWord.wordInEn = word;
                 return;
             }
 
@@ -89,7 +82,7 @@ export const useStore = defineStore({
                 },
             })
                 .then((res) => {
-                    this.englishTranslation = res?.data?.responseData?.translatedText;
+                    this.newWord.wordInEn = res?.data?.responseData?.translatedText;
                 })
                 .catch((e) => {
                     console.log(e)
@@ -103,12 +96,11 @@ export const useStore = defineStore({
                 url: UNSPLASH_API,
                 params: {
                     client_id: config.public.UNSPLASH_KEY,
-                    query: this.englishTranslation,
+                    query: this.newWord.wordInEn,
                 },
             })
                 .then((res) => {
-                    this.img = res?.data?.results.length ? res?.data?.results[0]?.urls?.small : null
-                    console.log(res?.data?.results[0].urls.small)
+                    this.newWord.img = res?.data?.results.length ? res?.data?.results[0]?.urls?.small : null;
                 })
                 .catch((e) => {
                     console.log(e)

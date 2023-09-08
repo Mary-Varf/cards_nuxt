@@ -1,7 +1,5 @@
 <template>
-    <div class="col-9">
         <AppCard></AppCard>
-    </div>
 </template>
 
 <script setup>
@@ -14,7 +12,7 @@ const { words } = storeToRefs(wordsStore);
 
 
 const updateCard = () => {
-
+    wordsStore.setRandomWord();
 }
 </script>
 

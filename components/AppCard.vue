@@ -1,9 +1,11 @@
 <template>
-    <div class="card__container p-2">
-        <button v-if="randomWord" @click="updateCard">New Card</button>
-        <div v-if="randomWord"
+    <div class="card__container p-2 ">
+        <div class="flipcard"
+        v-if="randomWord"
              ref="card"
-             class="flipcard"
+             draggable="true"
+             @dragend.prevent
+             @dragstart="updateCard"
              @click="turnCard">
             <div class="card mx-auto front" style="width: 18rem;">
                 <img :src="randomWord.img" class="card-img-top">
@@ -24,30 +26,27 @@
                     <h3 class="card-text">{{ randomWord.wordInEs }}</h3>
                 </div>
             </div>
-        </div>
-
-        <DefaultCard v-else></DefaultCard>
+            </div>
     </div>
+<!--    <DefaultCard v-else></DefaultCard>-->
 </template>
 
 <script setup>
 import { storeToRefs } from 'pinia';
 import DefaultCard from "~/components/DefaultCard.vue";
 import { useStore } from "~/store/words";
+import IconRandom from "~/components/UI/Icons/IconRandom.vue";
 
 const wordsStore = useStore();
 const { words, randomWord } = storeToRefs(wordsStore);
 const card = ref(null);
 const isMainCardSide = ref(true);
-const text = ref(null);
 
 const updateCard = () => {
     wordsStore.setRandomWord();
+    isMainCardSide.value = true;
 }
 let speech;
-// const handleSpeak = () => {
-//     console.log()
-// }
 let isChrome;
 let voices = [];
 let isFirefox;
@@ -63,20 +62,6 @@ isChrome = !!window.chrome && !!window.chrome.webstore;
 function play(wordToSpeak) {
     const getVoices = () => {
         voices = speech.getVoices();
-        console.log(voices);
-
-        // // Loop through voices and create an option for each one
-        voices.forEach(voice => {
-            //     // Create option element
-            //     const option = document.createElement('option');
-            //     // Fill option with voice and language
-            //     option.textContent = voice.name + '(' + voice.lang + ')';
-            //
-            //     // Set needed option attributes
-            //     option.setAttribute('data-lang', voice.lang);
-            //     option.setAttribute('data-name', voice.name);
-            //     voiceSelect.appendChild(option);
-        });
     };
 
     if (isFirefox) {
@@ -128,6 +113,8 @@ const toggleClass = () => {
 <style scoped>
     .card__container {
         width: 100%;
+        position: relative;
+        height: 100%;
     }
     .card {
         transition: rotateY 0.5s, perspective 0.5s;
@@ -138,9 +125,9 @@ const toggleClass = () => {
     }
     .flipcard {
         position: relative;
-        perspective: 500px;
-        float:left;
         width: 100%;
+        justify-content: center;
+        align-items: center;
     }
 
     .flipcard.turn .front, .flipcard.flip .front{
@@ -163,8 +150,9 @@ const toggleClass = () => {
     }
     .flipcard .front, .flipcard .back
     {
-        position:absolute;
-        width: 100%;
+        position: absolute;
+        top: 50%;
+        left: calc(50% - 9rem);
         height: 330px;
         box-sizing: border-box;
         transition: all 0.5s ease-in;

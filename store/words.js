@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import axios from 'axios';
+import mongoose from "mongoose";
 import { API, UNSPLASH_API } from "~/store/consts";
 
 export const useStore = defineStore({
@@ -28,7 +29,10 @@ export const useStore = defineStore({
 
             await $fetch(API.SAVE_WORD, {
                 method: 'POST',
-                body: this.newWord,
+                body: {
+                    ...this.newWord,
+                    _id: new mongoose.Types.ObjectId().toString(),
+                },
             })
                 .then((resp) => {
                     this.words = [...this.words].push(this.newWord);

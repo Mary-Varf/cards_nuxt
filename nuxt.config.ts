@@ -28,6 +28,7 @@ export default defineNuxtConfig({  modules: [
             AUTH0_CALLBACK_URL: process.env.AUTH0_CALLBACK_URL,
             TRANSLATE_KEY: process.env.TRANSLATE_KEY,
             UNSPLASH_KEY: process.env.UNSPLASH_KEY,
+            PIXABAY_KEY: process.env.PIXABAY_KEY,
         }
     },
     auth: {

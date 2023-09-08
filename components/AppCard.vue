@@ -3,7 +3,7 @@
         <button v-if="randomWord" @click="updateCard">New Card</button>
         <div v-if="randomWord"
              ref="card"
-             class="flipcard mb-2"
+             class="flipcard"
              @click="turnCard">
             <div class="card mx-auto front" style="width: 18rem;">
                 <img :src="randomWord.img" class="card-img-top">
@@ -136,9 +136,6 @@ const toggleClass = () => {
     .card.turn {
         transform: rotateY(180deg) perspective(200px);
     }
-    .card-img-top {
-        object-fit: cover;
-    }
     .flipcard {
         position: relative;
         perspective: 500px;
@@ -168,7 +165,7 @@ const toggleClass = () => {
     {
         position:absolute;
         width: 100%;
-        height:300px;
+        height: 330px;
         box-sizing: border-box;
         transition: all 0.5s ease-in;
         padding: 10px;
@@ -178,6 +175,7 @@ const toggleClass = () => {
     .flipcard img
     {
         width:100%;
-        height:200px;
+        height: 200px;
+        object-fit: cover;
     }
 </style>

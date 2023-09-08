@@ -6,22 +6,32 @@ export const useStore = defineStore({
     id: 'words-store',
     state: () => {
         return {
-            //TODO: change text to wordInEn, translation wordInEsp
             words: [],
             randomWord: { wordInEn: null, wordInEs: null, wordInRu: null, img: null },
             newWord: { wordInEn: null, wordInEs: null, wordInRu: null, img: null },
+            translationOption: 'en',
         }
     },
     getters: {
     },
     actions: {
-        async saveNewWord(newWord) {
+        setNewWord(newWord) {
+            this.newWord = newWord;
+        },
+        setTranslationOption(newOption) {
+            this.translationOption = newOption;
+        },
+        async saveNewWord() {
+            if(!this.newWord.wordInRu?.length || !this.newWord.wordInEs?.length || !this.newWord.wordInEn?.length) {
+                return;
+            }
+
             await $fetch(API.SAVE_WORD, {
                 method: 'POST',
-                body: newWord,
+                body: this.newWord,
             })
                 .then((resp) => {
-                    this.words = [...this.words].push(newWord);
+                    this.words = [...this.words].push(this.newWord);
                     this.clearTranslations();
                 })
                 .catch((error) => {
@@ -50,45 +60,61 @@ export const useStore = defineStore({
                     console.log(error)
                 })
         },
-        async getTranslation({ word, lg }) {
+        async getTranslationRequest({ word, langs, newWordPropName }) {
+            console.log(langs)
             axios.request({
                 method: 'GET',
                 url: 'https://api.mymemory.translated.net/get',
                 params: {
-                    langpair: lg,
+                    langpair: langs,
                     q: word,
                 },
             })
                 .then((res) => {
-                    this.translation = res?.data?.responseData?.translatedText;
+                    console.log(res?.data?.responseData)
+                    this.newWord[newWordPropName] = res?.data?.responseData?.translatedText;
                 })
                 .catch((e) => {
                     console.log(e)
                 })
         },
-        async getEnglishTranslation({ word, lg }) {
-            const initialLang = lg.slice(0, 2);
-            if (initialLang == 'en') {
-                this.newWord.wordInEn = word;
+        async getSpanishTranslation(wordToTranslate) {
+            if (this.translationOption === 'es') {
+                this.newWord.wordInEs= wordToTranslate;
                 return;
             }
 
-            axios.request({
-                method: 'GET',
-                url: 'https://api.mymemory.translated.net/get',
-                params: {
-                    langpair: `${initialLang}|en`,
-                    q: word,
-                },
-            })
-                .then((res) => {
-                    this.newWord.wordInEn = res?.data?.responseData?.translatedText;
-                })
-                .catch((e) => {
-                    console.log(e)
-                })
+            const newWordPropName = 'wordInEs';
+            const langs = `${this.translationOption}|es`;
+
+            await this.getTranslationRequest({ word: wordToTranslate, langs, newWordPropName });
+        },
+        async getEnglishTranslation(wordToTranslate) {
+            if (this.translationOption === 'en') {
+                this.newWord.wordInEn= wordToTranslate;
+                return;
+            }
+
+            const newWordPropName = 'wordInEn';
+            const langs = `${this.translationOption}|en`;
+
+            await this.getTranslationRequest({ word: wordToTranslate, langs, newWordPropName });
+        },
+        async getRussianTranslation(wordToTranslate) {
+            if (this.translationOption === 'ru') {
+                this.newWord.wordInRu= wordToTranslate;
+                return;
+            }
+
+            const newWordPropName = 'wordInRu';
+            const langs = `${this.translationOption}|ru`;
+
+            await this.getTranslationRequest({ word: wordToTranslate, langs, newWordPropName });
         },
         async getImg() {
+            if(!this.newWord.wordInEn) {
+                return;
+            }
             const config = useRuntimeConfig();
 
             axios.request({
@@ -101,6 +127,7 @@ export const useStore = defineStore({
             })
                 .then((res) => {
                     this.newWord.img = res?.data?.results.length ? res?.data?.results[0]?.urls?.small : null;
+
                 })
                 .catch((e) => {
                     console.log(e)

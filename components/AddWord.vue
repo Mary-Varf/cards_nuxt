@@ -1,34 +1,47 @@
 <template>
     <div class="card mx-auto default-card add-card" style="width: 18rem;">
-        <div class="card-img-top"><img class="add-word__img" v-if="img" :src="img" /></div>
+        <div class="card-img-top"><img class="add-word__img" :src="newWord.img" /></div>
         <div class="card-body">
-            <label for="lang" class="form-label">Select languages</label>
-            <select @change="setLangs" class="form-select" id="lang">
-                <option value="en|es">EN-ES</option>
-                <option value="en|ru">EN-RU</option>
-                <option value="es|en">ES-EN</option>
-                <option value="es|ru">ES-RU</option>
-                <option value="ru|en">RU-EN</option>
-                <option value="en|ru">EN-RU</option>
-                <option value="ru|es">RU-ES</option>
-            </select>
-            <div>
-                <label for="word" class="form-label">Word</label>
+            <label for="lang" class="form-label">Insert your word</label>
+            <div class="d-flex gap-1">
+                <select v-model="translationOption" class="form-select" id="lang">
+                    <option value="en" :selected="translationOption === 'en'">EN</option>
+                    <option value="es" :selected="translationOption === 'es'">ES</option>
+                    <option value="ru" :selected="translationOption === 'ru'">RU</option>
+                </select>
+
                 <input type="text"
                        class="form-control"
                        id="word"
-                       :value="wordToTranslate"
-                       @input="setWord"
+                       v-model="wordToTranslate"
                        @keydown="handleEnter"
                 >
             </div>
+            <div class="d-flex justify-content-center">
+                <button class="btn btn-primary mt-3" @click="getNewWordData">Translate</button>
+            </div>
             <div>
-                <label for="translation" class="form-label">Translation</label>
+                <label for="word" class="form-label">English:&nbsp;</label>
+                <input type="text"
+                       class="form-control"
+                       id="word"
+                       v-model="newWord.wordInEn"
+                >
+            </div>
+            <div>
+                <label for="translationEs" class="form-label">Spanish:</label>
                 <input type="text"
                        class="form-control"
                        id="translation"
-                       :value="translation"
-                       @focus="updateCard"
+                       v-model="newWord.wordInEs"
+                >
+            </div>
+            <div>
+                <label for="translation" class="form-label">Russian:</label>
+                <input type="text"
+                       class="form-control"
+                       id="translation"
+                       v-model="newWord.wordInRu"
                 >
             </div>
             <div class="d-flex justify-content-center">
@@ -39,43 +52,34 @@
 </template>
 
 <script setup>
-import mongoose from "mongoose";
 import { storeToRefs } from 'pinia';
 import { useStore } from "~/store/words";
 
 const wordsStore = useStore();
-const { translation, img, wordToTranslate } = storeToRefs(wordsStore);
-const langs = ref('en|es');
-const updateCard = () => {
-    wordsStore.getTranslation({ word: wordToTranslate.value, lg: langs.value });
-    wordsStore.getEnglishTranslation({ word: wordToTranslate.value, lg: langs.value });
-    wordsStore.getImg();
-}
+const { newWord, translationOption } = storeToRefs(wordsStore);
+const wordToTranslate = ref(null);
 
-const setWord = (e) => {
-    wordsStore.setWordToTranslate(e.target.value);
-}
-
-const setLangs = (e) => {
-    langs.value = e.target.value;
+const getNewWordData = async () => {
+    wordsStore.getEnglishTranslation(wordToTranslate.value)
+        .then(() => {
+            wordsStore.getSpanishTranslation(wordToTranslate.value);
+        })
+        .then(() => {
+            wordsStore.getRussianTranslation(wordToTranslate.value);
+        })
+        .then(() => {
+            wordsStore.getImg();
+        })
 }
 
 const handleSave = () => {
-    if (!wordToTranslate.value || !wordToTranslate.value?.length || !translation) {
-        return;
-    }
-
-    wordsStore.saveNewWord({
-        _id: new mongoose.Types.ObjectId().toString(),
-        word: wordToTranslate.value,
-        translation: translation.value,
-        img: img.value,
-    })
+    wordsStore.saveNewWord();
+    wordToTranslate.value = null;
 }
 
 const handleEnter = (e) => {
     if (e?.keyCode == 13) {
-        updateCard();
+        getNewWordData();
     }
 }
 </script>
@@ -85,5 +89,8 @@ const handleEnter = (e) => {
     width: 100%;
     height: 200px;
     object-fit: cover;
+}
+.form-select {
+    max-width: 70px;
 }
 </style>
